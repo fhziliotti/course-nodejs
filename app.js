@@ -10,6 +10,7 @@ app.use(bodyParser.json());
 load("controller").then("route").into(app);
 
 app.listen(3000, ()=>{
+	app.locals.usuario = [];
 	console.log("Servidor iniciado com sucesso!");
 });
 
