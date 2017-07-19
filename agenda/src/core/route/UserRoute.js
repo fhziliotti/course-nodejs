@@ -1,5 +1,5 @@
 module.exports = function (app){
-    let userController = app.controller.UserController;
+    let userController = app.src.api.user.UserController;
 
     app.route("/user")
         .get(userController.list)
