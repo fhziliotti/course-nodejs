@@ -1,4 +1,7 @@
 module.exports = (app)=>{
+    const connectionString = require("../../../config/Environment.js").database;
+    const userRepository = require("./UserRepository.js");
+
     return {
         list,
         listById,
@@ -8,110 +11,98 @@ module.exports = (app)=>{
     }
 
     function list(req, res){
-    return res.json({
-        message: "Usuários retornados com sucesso!",
-        code: 1,
-        result: app.locals.usuario
-    })
+        userRepository.list(connectionString, (err, rows)=>{
+           if(err){
+               res.status(500);
+               return res.json({
+                   message: "Internal Server Error!",
+                   code: 1,
+                   error: err
+               });
+           }
+            else{
+                return res.json({
+                    message: "Usuários listados com sucesso!",
+                    code: 0,
+                    error: rows
+                });
+            }
+        });
     }
     function listById (req, res){
-        let id = req.params.idUser;
-        let user = undefined;
-        app.locals.usuario.forEach((item)=>{
-           if(item.id == id){
-            user = item;
+        let params = {
+            id: req.params.idUser
         }
-        });
 
-        if(user){
-            res.status(200);
-            return res.json({
-                message: "Usuário listado com sucesso!",
-                code: 0,
-                result: user
-            });
-        }
-        else{
-            res.status(404);
-            return res.json({
-                message: "Usuário não encontrado!",
-                code: 1
-            });
-        }
+        userRepository.listById(connectionString, params, (err, rows)=>{
+            if(err){
+                res.status(500);
+                return res.json({
+                    message: "Internal Server Error!",
+                    code: 1,
+                    error: err
+                });
+            }
+            else{
+                res.status(rows.length ? 200 : 404);
+                return res.json({
+                    message: "Usuário listado com sucesso!",
+                    code: 0,
+                    error: rows
+                });
+            }
+        });
     }
+
     function insert (req, res){
     // JSON no corpo da requisição
     // PATHPARAM manda o parâmetro no caminho, exemplo ....../3
     // user?q=p
 
         let params = {
-            id: req.body.id,
             nome: req.body.nome,
-            sobrenome: req.body.sobrenome
+            dataNascimento: req.body.dataNascimento,
+            sexo: req.body.sexo
         }
-        app.locals.usuario.push(params);
 
-        return res.json({
-            message: "Usuário adicionado com sucesso!",
-            code: 0
+        userRepository.insert(connectionString, params, (err, rows)=>{
+            res.status(err ? 500 : 200);
+                return res.json({
+                    message: err ? "Erro ao inserir usuário!" : "Usuário inserido com sucesso!",
+                    code: err ? 1 : 0,
+                    error: err ? err : undefined
+                });
         });
     }
     function update (req, res){
         let params = {
             id: req.params.idUser,
             nome: req.body.nome,
-            sobrenome: req.body.sobrenome
+            dataNascimento: req.body.dataNascimento,
+            sexo: req.body.sexo
         }
 
-        let achou = 0;
-
-        for(let i=0; i< app.locals.usuario.length; i++){
-            if(app.locals.usuario[i].id == params.id){
-                app.locals.usuario[i] = params;
-                achou = 1;
-            }
-        }
-
-        if(achou){
-            res.status(200);
+        userRepository.update(connectionString, params, (err, rows)=>{
+            res.status(err ? 500 : 200);
             return res.json({
-                message: "Usuário editado com sucesso!",
-                code: 0
+                message: err ? "Erro ao modificar usuário!" : "Usuário modificado com sucesso!",
+                code: err ? 1 : 0,
+                error: err ? err : undefined
             });
-        }
-        else {
-            res.status(404);
-            return res.json({
-                message: "Usuário não encontrado!",
-                code: 1
-            });
-        }
+        });
     }
 function remove (req, res){
-    let id = req.params.idUser;
-
-    let achou = 0;
-
-    for(let i=0; i< app.locals.usuario.length; i++){
-        if(app.locals.usuario[i].id == id){
-            app.locals.usuario.splice(i, 1);
-            achou = 1;
-        }
+    let params = {
+        id: req.params.idUser
     }
 
-    if(achou){
-        res.status(200);
+    userRepository.remove(connectionString, params, (err, rows)=>{
+        res.status(err ? 500 : 200);
         return res.json({
-            message: "Usuário removido com sucesso!",
-            code: 0
+            message: err ? "Erro ao remover usuário!" : "Usuário removido com sucesso!",
+            code: err ? 1 : 0,
+            error: err ? err : undefined
         });
-    }
-    else {
-        res.status(404);
-        return res.json({
-            message: "Usuário não encontrado!",
-            code: 1
-        });
-    }
+    });
 }
 };
