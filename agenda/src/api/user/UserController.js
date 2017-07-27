@@ -11,7 +11,9 @@ module.exports = (app)=>{
     }
 
     function list(req, res){
-        userRepository.list(connectionString, (err, rows)=>{
+        let q = req.query.q;
+
+        userRepository.list(connectionString, q, (err, rows)=>{
            if(err){
                res.status(500);
                return res.json({
@@ -62,16 +64,29 @@ module.exports = (app)=>{
         let params = {
             nome: req.body.nome,
             dataNascimento: req.body.dataNascimento,
-            sexo: req.body.sexo
+            sexo: req.body.sexo,
+            telefone: req.body.telefone ? JSON.stringify(req.body.telefone) : null,
+            endereco: req.body.endereco ? JSON.stringify(req.body.endereco) : null
         }
 
         userRepository.insert(connectionString, params, (err, rows)=>{
-            res.status(err ? 500 : 200);
+            if(err){
+                res.status(500);
                 return res.json({
-                    message: err ? "Erro ao inserir usuário!" : "Usuário inserido com sucesso!",
-                    code: err ? 1 : 0,
-                    error: err ? err : undefined
+                    message: "Deu pau!",
+                    code: 1,
+                    err: err
                 });
+            }
+            else {
+                let result = rows[0].insertuserfull;
+                    res.status(result.httpCode);
+                    return res.json({
+                        message: result.result,
+                        code: result.code,
+                        err: undefined
+                    });
+            }
         });
     }
     function update (req, res){
@@ -79,16 +94,29 @@ module.exports = (app)=>{
             id: req.params.idUser,
             nome: req.body.nome,
             dataNascimento: req.body.dataNascimento,
-            sexo: req.body.sexo
+            sexo: req.body.sexo,
+            telefone: req.body.telefone ? JSON.stringify(req.body.telefone) : null,
+            endereco: req.body.endereco ? JSON.stringify(req.body.endereco) : null
         }
 
         userRepository.update(connectionString, params, (err, rows)=>{
-            res.status(err ? 500 : 200);
-            return res.json({
-                message: err ? "Erro ao modificar usuário!" : "Usuário modificado com sucesso!",
-                code: err ? 1 : 0,
-                error: err ? err : undefined
-            });
+            if(err){
+                res.status(500);
+                return res.json({
+                    message: "Deu pau!",
+                    code: 1,
+                    err: err
+                });
+            }
+            else {
+                let result = rows[0].updateuserfull;
+                res.status(result.httpCode);
+                return res.json({
+                    message: result.result,
+                    code: result.code,
+                    err: undefined
+                });
+            }
         });
     }
 function remove (req, res){
@@ -97,12 +125,23 @@ function remove (req, res){
     }
 
     userRepository.remove(connectionString, params, (err, rows)=>{
-        res.status(err ? 500 : 200);
-        return res.json({
-            message: err ? "Erro ao remover usuário!" : "Usuário removido com sucesso!",
-            code: err ? 1 : 0,
-            error: err ? err : undefined
-        });
+        if(err){
+            res.status(500);
+            return res.json({
+                message: "Deu pau!",
+                code: 1,
+                err: err
+            });
+        }
+        else {
+            let result = rows[0].removeuserfull;
+            res.status(result.httpCode);
+            return res.json({
+                message: result.result,
+                code: result.code,
+                err: undefined
+            });
+        }
     });
 }
 };
