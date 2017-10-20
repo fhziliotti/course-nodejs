@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script type="text/javascript" src="script/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="script/jaja.js"></script>
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+</head>
+<body onload="listar()">
+    <div id="contatos">
+        <ul id="messages"></ul>
+    </div>
+<div>
+    <button onclick="teste()">Enviar</button>
+    <button onclick="listar()">Listar</button>
+</div>
+<div>
+    <input id="id" type="number">
+    <button onclick="deletar();">Deletar</button>
+</div>
+</body>
+</html>
+
+<script>
+    var socket = io.connect('http://localhost:3000');
+
+    // EVENTOS DO SOCKET
+    socket.on('insertUser', function(){
+        console.log('Um novo usuário foi inserido!');
+        listar();
+    });
+
+    socket.on('deleteUser', function(){
+        console.log('Um usuário foi deletado!');
+        listar();
+    });
+</script>
